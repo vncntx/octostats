@@ -33,18 +33,8 @@ func (o *OctoClient) GetAuthenticatedUser() (User, error) {
 		return User{}, err
 	}
 
-	if res.Body == nil {
-		return User{}, fmt.Errorf("no response from GitHub: %s", res.Request.URL)
-	}
-
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return User{}, err
-	}
-
 	user := User{}
-	err = json.Unmarshal(body, &user)
+	err = o.parseBody(res, &user)
 	if err != nil {
 		return User{}, err
 	}
@@ -79,4 +69,23 @@ func (o *OctoClient) sendRequest(req *http.Request) (*http.Response, error) {
 	}
 
 	return res, nil
+}
+
+func (o *OctoClient) parseBody(res *http.Response, v interface{}) error {
+	if res.Body == nil {
+		return fmt.Errorf("no response from GitHub: %s", res.Request.URL)
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(body, v)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
