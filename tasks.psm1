@@ -89,7 +89,7 @@ Invoke-Run --help
 #>
 Function Invoke-Run {
     $module = (Get-GoModule)
-    go run $module $args
+    go run "$module" "$args"
 }
 
 <#

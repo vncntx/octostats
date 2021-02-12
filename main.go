@@ -12,11 +12,20 @@ func main() {
 		Token: os.Getenv(GitHubToken),
 	}
 	if len(auth.User) < 1 {
-		log.Error("GitHub login user is empty. Set %s env variable", GitHubUser)
+		log.Fatal("GitHub login user is empty. Set %s env variable", GitHubUser)
+		return
 	}
 	if len(auth.Token) < 1 {
-		log.Error("GitHub login token is empty. Set %s env variable", GitHubToken)
+		log.Fatal("GitHub login token is empty. Set %s env variable", GitHubToken)
+		return
 	}
+
+	if len(os.Args) < 3 {
+		log.Fatal("not enough arguments")
+		return
+	}
+	owner := os.Args[1]
+	repo := os.Args[2]
 
 	client := github.NewOctoClient(auth)
 
@@ -26,4 +35,5 @@ func main() {
 		return
 	}
 	log.Info("authenticated as %#v", user)
+	log.Info("inspecting %s/%s", owner, repo)
 }
