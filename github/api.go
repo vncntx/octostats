@@ -28,7 +28,7 @@ func NewOctoClient(cred Credentials) Client {
 
 // GetAuthenticatedUser returns the current user
 func (o *OctoClient) GetAuthenticatedUser() (User, error) {
-	res, err := o.getRequest(UserEndpoint, nil)
+	res, err := o.sendGet(UserEndpoint, nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -42,7 +42,7 @@ func (o *OctoClient) GetAuthenticatedUser() (User, error) {
 	return user, nil
 }
 
-func (o *OctoClient) getRequest(endpoint string, body io.Reader) (*http.Response, error) {
+func (o *OctoClient) sendGet(endpoint string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest("GET", o.buildURL(endpoint), body)
 	if err != nil {
 		return nil, err
