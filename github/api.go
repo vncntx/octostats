@@ -86,6 +86,7 @@ func (o *OctoClient) buildURL(endpoint string, params url.Values) string {
 
 func (o *OctoClient) setHeaders(req *http.Request) {
 	req.Header.Add("Authorization", o.auth)
+	req.Header.Add("Accept", "application/vnd.github.v3+json")
 }
 
 func (o *OctoClient) sendRequest(req *http.Request) (*http.Response, error) {

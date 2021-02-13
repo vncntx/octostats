@@ -53,7 +53,7 @@ func main() {
 		log.Debug("getting page %d of pull requests", page)
 		pulls, err := client.ListPulls(repo, page, filters.All)
 		if err != nil {
-			log.Fatal("failed to get pull requests user: %s", err)
+			log.Fatal("failed to get pull requests: %s", err)
 			return
 		}
 		if len(pulls) < 1 {
