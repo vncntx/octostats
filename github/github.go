@@ -12,6 +12,7 @@ type Client interface {
 	GetAuthenticatedUser() (User, error)
 	ListPulls(repo string, page int, state string) ([]Pull, error)
 	SearchPulls(repo string, page int, q *QueryBuilder) (SearchResponse, error)
+	GetPull(repo string, number int) (Pull, error)
 }
 
 // User is a GitHub user
@@ -31,10 +32,12 @@ type Pull struct {
 	Number      int       `json:"number"`
 	Title       string    `json:"title"`
 	User        User      `json:"user"`
+	IsMerged    bool      `json:"merged"`
 	CreatedAt   time.Time `json:"created_at"`
 	MergedAt    time.Time `json:"merged_at"`
 	ClosedAt    time.Time `json:"closed_at"`
 	MergeCommit string    `json:"merge_commit_sha"`
+	Reviewers   []User    `json:"requested_reviewers"`
 }
 
 // SearchResponse are the results of an issue or pull request search

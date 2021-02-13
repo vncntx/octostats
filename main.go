@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/vincentfiestada/octostats/github"
 	"github.com/vincentfiestada/octostats/util"
@@ -45,8 +46,9 @@ func main() {
 	}
 
 	page := 1
-	count := 0 // number of merged pull requests
-	// totalInNanoseconds := int64(0) // total time to merge in nanoseconds
+	count := 0                           // number of merged pull requests
+	reviewersCount := 0                  // total number of reviewers
+	timeToMergeInNanoSeconds := int64(0) // total time to merge in nanoseconds
 
 	query := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
 
@@ -65,21 +67,34 @@ func main() {
 		}
 		page++
 
-		for _, pull := range results.Items {
-			log.Debug("%#v", pull)
+		for _, item := range results.Items {
 
-			// timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
-			// log.Info("pull request #%d took %.6f hours to merge (created by %s)", pull.Number, timeToMerge.Hours(), pull.User)
+			pull, err := client.GetPull(repo, item.Number)
+			if err != nil {
+				log.Warn("couldn't get details of pull request #%d: %s", item.Number, err)
+				continue
+			}
+			if pull.CreatedAt.IsZero() || pull.MergedAt.IsZero() {
+				log.Warn("pull request #%d has invalid timestamps", pull.Number)
+				continue
+			}
 
-			// totalInNanoseconds += timeToMerge.Nanoseconds()
+			timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
+			log.Info("pull request #%d took %.6f hours to merge (%d reviewers)", pull.Number, timeToMerge.Hours(), len(pull.Reviewers))
+
+			reviewersCount += len(pull.Reviewers)
+			timeToMergeInNanoSeconds += timeToMerge.Nanoseconds()
 			count++
 		}
 	}
 
 	log.Info("found %d merged pull requests for %s", count, repo)
 
-	// if count > 0 {
-	// 	avg := time.Duration(totalInNanoseconds / int64(count))
-	// 	log.Info("average time to merge: %.6f hours", avg.Hours())
-	// }
+	if count > 0 {
+		avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
+		log.Info("average time to merge: %.6f hours", avgTimeToMerge.Hours())
+
+		avgReviewersCount := reviewersCount / count
+		log.Info("average reviewers count: %d", avgReviewersCount)
+	}
 }

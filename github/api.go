@@ -88,6 +88,24 @@ func (o *OctoClient) SearchPulls(repo string, page int, q *QueryBuilder) (Search
 	return results, nil
 }
 
+// GetPull retrieves details about a pull request
+func (o *OctoClient) GetPull(repo string, number int) (Pull, error) {
+	endpoint := fmt.Sprintf(pullDetailsEndpoint, repo, number)
+
+	res, err := o.sendGet(endpoint, nil, nil)
+	if err != nil {
+		return Pull{}, err
+	}
+
+	pull := Pull{}
+	err = o.parseBody(res, &pull)
+	if err != nil {
+		return Pull{}, err
+	}
+
+	return pull, nil
+}
+
 // sendGet sends an HTTP GET request
 func (o *OctoClient) sendGet(endpoint string, params url.Values, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest("GET", o.buildURL(endpoint, params), body)

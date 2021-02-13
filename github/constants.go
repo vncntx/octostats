@@ -4,10 +4,11 @@ package github
 const (
 	baseEndpoint = "https://api.github.com"
 
-	userEndpoint   = "/user"
-	reposEndpoint  = "/repos"
-	pullsEndpoint  = reposEndpoint + "/%s/pulls"
-	searchEndpoint = "/search/issues"
+	userEndpoint        = "/user"
+	reposEndpoint       = "/repos"
+	pullsEndpoint       = reposEndpoint + "/%s/pulls"
+	pullDetailsEndpoint = pullsEndpoint + "/%d"
+	searchEndpoint      = "/search/issues"
 )
 
 // GitHub search qualifiers
