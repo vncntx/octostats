@@ -4,5 +4,7 @@ package github
 const (
 	BaseEndpoint = "https://api.github.com"
 
-	UserEndpoint = "/user"
+	UserEndpoint  = "/user"
+	ReposEndpoint = "/repos/%s"
+	PullsEndpoint = ReposEndpoint + "/pulls"
 )

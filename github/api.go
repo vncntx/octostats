@@ -6,6 +6,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 // OctoClient is a GitHub REST API Client
@@ -28,7 +30,7 @@ func NewOctoClient(cred Credentials) Client {
 
 // GetAuthenticatedUser returns the current user
 func (o *OctoClient) GetAuthenticatedUser() (User, error) {
-	res, err := o.sendGet(UserEndpoint, nil)
+	res, err := o.sendGet(UserEndpoint, nil, nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -42,8 +44,30 @@ func (o *OctoClient) GetAuthenticatedUser() (User, error) {
 	return user, nil
 }
 
-func (o *OctoClient) sendGet(endpoint string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest("GET", o.buildURL(endpoint), body)
+// ListPulls returns the list of pull requests
+func (o *OctoClient) ListPulls(repo string, page int, state string) ([]Pull, error) {
+	params := url.Values{}
+	params.Set("page", strconv.Itoa(page))
+	params.Set("state", state)
+
+	endpoint := fmt.Sprintf(PullsEndpoint, repo)
+
+	res, err := o.sendGet(endpoint, params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	pulls := []Pull{}
+	err = o.parseBody(res, &pulls)
+	if err != nil {
+		return nil, err
+	}
+
+	return pulls, nil
+}
+
+func (o *OctoClient) sendGet(endpoint string, params url.Values, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest("GET", o.buildURL(endpoint, params), body)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +75,13 @@ func (o *OctoClient) sendGet(endpoint string, body io.Reader) (*http.Response, e
 	return o.sendRequest(req)
 }
 
-func (o *OctoClient) buildURL(endpoint string) string {
-	return o.BaseEndpoint + endpoint
+func (o *OctoClient) buildURL(endpoint string, params url.Values) string {
+	url := o.BaseEndpoint + endpoint
+	if params != nil {
+		url += "?" + params.Encode()
+	}
+
+	return url
 }
 
 func (o *OctoClient) setHeaders(req *http.Request) {
