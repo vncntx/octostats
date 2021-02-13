@@ -46,9 +46,10 @@ func main() {
 	}
 
 	page := 1
-	count := 0                           // number of merged pull requests
-	reviewersCount := 0                  // total number of reviewers
-	timeToMergeInNanoSeconds := int64(0) // total time to merge in nanoseconds
+	count := 0                                 // number of merged pull requests
+	countByLabel := make(map[github.Label]int) // number of prs by label
+	reviewersCount := 0                        // total number of reviewers
+	timeToMergeInNanoSeconds := int64(0)       // total time to merge in nanoseconds
 
 	query := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
 
@@ -85,16 +86,26 @@ func main() {
 			reviewersCount += len(pull.Reviewers)
 			timeToMergeInNanoSeconds += timeToMerge.Nanoseconds()
 			count++
+
+			for _, label := range pull.Labels {
+				countByLabel[label]++
+			}
 		}
 	}
 
 	log.Info("found %d merged pull requests for %s", count, repo)
 
-	if count > 0 {
-		avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
-		log.Info("average time to merge: %.6f hours", avgTimeToMerge.Hours())
+	if count < 1 {
+		return
+	}
 
-		avgReviewersCount := reviewersCount / count
-		log.Info("average reviewers count: %d", avgReviewersCount)
+	avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
+	log.Info("average time to merge: %.6f hours", avgTimeToMerge.Hours())
+
+	avgReviewersCount := reviewersCount / count
+	log.Info("average reviewers count: %d", avgReviewersCount)
+
+	for label, count := range countByLabel {
+		log.Info("with label '%s': %d", label, count)
 	}
 }

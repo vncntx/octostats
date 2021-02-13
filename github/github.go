@@ -47,6 +47,11 @@ type Label struct {
 	Description string `json:"description"`
 }
 
+// String returns the label as a string
+func (l Label) String() string {
+	return l.Name
+}
+
 // SearchResponse are the results of an issue or pull request search
 type SearchResponse struct {
 	Total        int            `json:"total_count"`
