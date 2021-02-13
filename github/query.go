@@ -3,18 +3,22 @@ package github
 import (
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/vincentfiestada/octostats/commons"
 )
 
 // QueryBuilder creates a search query with keywords and qualifiers
 // See https://docs.github.com/en/github/searching-for-information-on-github/searching-issues-and-pull-requests
 type QueryBuilder struct {
-	keywords string
-	typ      string
-	state    string
-	author   string
-	repo     string
-	isDraft  bool
-	isMerged bool
+	keywords    string
+	typ         string
+	state       string
+	author      string
+	repo        string
+	isDraft     bool
+	isMerged    bool
+	mergedAfter time.Time
 }
 
 // Query returns a new QueryBuilder
@@ -54,6 +58,12 @@ func (q *QueryBuilder) WithRepo(repo string) *QueryBuilder {
 	return q
 }
 
+// IsMergedAfter filters pull requests that were merged after a given date
+func (q *QueryBuilder) IsMergedAfter(t time.Time) *QueryBuilder {
+	q.mergedAfter = t
+	return q
+}
+
 // withType adds a type qualifier
 func (q *QueryBuilder) withType(typ string) *QueryBuilder {
 	q.typ = typ
@@ -81,6 +91,10 @@ func (q *QueryBuilder) Build() string {
 	}
 	if len(q.repo) > 0 {
 		parts = append(parts, has("repo", q.repo))
+	}
+	if !q.mergedAfter.IsZero() {
+		date := q.mergedAfter.Format(commons.DateLayout)
+		parts = append(parts, fmt.Sprintf("merged:>%s", date))
 	}
 	if len(q.keywords) > 0 {
 		parts = append(parts, q.keywords)
