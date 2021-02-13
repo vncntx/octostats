@@ -12,7 +12,8 @@ type Client interface {
 	GetAuthenticatedUser() (User, error)
 	ListPulls(repo string, page int, state string) ([]Pull, error)
 	SearchPulls(repo string, page int, q *QueryBuilder) (SearchResponse, error)
-	GetPull(repo string, number int) (Pull, error)
+	GetPull(repo string, pr int) (Pull, error)
+	ListReviews(repo string, pr int, page int) ([]Review, error)
 }
 
 // User is a GitHub user
@@ -87,4 +88,13 @@ func (r *Repo) UnmarshalJSON(b []byte) error {
 	name := strings.TrimPrefix(url, prefix)
 	*r = Repo(name)
 	return nil
+}
+
+// Review is a Pull Request review
+type Review struct {
+	ID          int       `json:"id"`
+	User        User      `json:"user"`
+	State       string    `json:"state"`
+	Commit      string    `json:"commit_id"`
+	SubmittedAt time.Time `json:"submitted_at"`
 }

@@ -48,7 +48,7 @@ func main() {
 	page := 1
 	count := 0                                 // number of merged pull requests
 	countByLabel := make(map[github.Label]int) // number of prs by label
-	reviewersCount := 0                        // total number of reviewers
+	reviewsCount := 0                          // total number of pr reviews
 	timeToMergeInNanoSeconds := int64(0)       // total time to merge in nanoseconds
 
 	query := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
@@ -75,21 +75,33 @@ func main() {
 				log.Warn("couldn't get details of pull request #%d: %s", item.Number, err)
 				continue
 			}
+
+			// Record time to merge
 			if pull.CreatedAt.IsZero() || pull.MergedAt.IsZero() {
 				log.Warn("pull request #%d has invalid timestamps", pull.Number)
 				continue
 			}
 
 			timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
-			log.Info("pull request #%d took %.6f hours to merge (%d reviewers)", pull.Number, timeToMerge.Hours(), len(pull.Reviewers))
-
-			reviewersCount += len(pull.Reviewers)
 			timeToMergeInNanoSeconds += timeToMerge.Nanoseconds()
-			count++
 
+			// Record number of reviews
+			reviews, err := countReviews(client, repo, item.Number)
+			if err != nil {
+				log.Warn("couldn't count reviews for pull request #%d: %s", item.Number, err)
+				continue
+			}
+			reviewsCount += reviews
+
+			log.Info("pull request #%d took %.6f hours to merge (%d reviews)", pull.Number, timeToMerge.Hours(), reviews)
+
+			// Count per label
 			for _, label := range pull.Labels {
 				countByLabel[label]++
 			}
+
+			// Count merged pull requests
+			count++
 		}
 	}
 
@@ -102,10 +114,31 @@ func main() {
 	avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
 	log.Info("average time to merge: %.6f hours", avgTimeToMerge.Hours())
 
-	avgReviewersCount := reviewersCount / count
-	log.Info("average reviewers count: %d", avgReviewersCount)
+	avgReviewsCount := reviewsCount / count
+	log.Info("average reviewers count: %d", avgReviewsCount)
 
 	for label, count := range countByLabel {
 		log.Info("with label '%s': %d", label, count)
 	}
+}
+
+func countReviews(client github.Client, repo string, pr int) (int, error) {
+	page := 1
+	count := 0
+
+	for {
+		reviews, err := client.ListReviews(repo, pr, page)
+		if err != nil {
+			log.Fatal("failed to get pull requests: %s", err)
+			return count, err
+		}
+		if len(reviews) < 1 {
+			break
+		}
+		page++
+
+		count += len(reviews)
+	}
+
+	return count, nil
 }

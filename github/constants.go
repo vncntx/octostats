@@ -8,6 +8,7 @@ const (
 	reposEndpoint       = "/repos"
 	pullsEndpoint       = reposEndpoint + "/%s/pulls"
 	pullDetailsEndpoint = pullsEndpoint + "/%d"
+	reviewsEndpoint     = pullDetailsEndpoint + "/reviews"
 	searchEndpoint      = "/search/issues"
 )
 

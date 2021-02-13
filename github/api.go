@@ -89,8 +89,8 @@ func (o *OctoClient) SearchPulls(repo string, page int, q *QueryBuilder) (Search
 }
 
 // GetPull retrieves details about a pull request
-func (o *OctoClient) GetPull(repo string, number int) (Pull, error) {
-	endpoint := fmt.Sprintf(pullDetailsEndpoint, repo, number)
+func (o *OctoClient) GetPull(repo string, pr int) (Pull, error) {
+	endpoint := fmt.Sprintf(pullDetailsEndpoint, repo, pr)
 
 	res, err := o.sendGet(endpoint, nil, nil)
 	if err != nil {
@@ -104,6 +104,27 @@ func (o *OctoClient) GetPull(repo string, number int) (Pull, error) {
 	}
 
 	return pull, nil
+}
+
+// ListReviews returns the list of reviews for a pull request
+func (o *OctoClient) ListReviews(repo string, pr int, page int) ([]Review, error) {
+	params := url.Values{}
+	params.Set("page", strconv.Itoa(page))
+
+	endpoint := fmt.Sprintf(reviewsEndpoint, repo, pr)
+
+	res, err := o.sendGet(endpoint, params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := []Review{}
+	err = o.parseBody(res, &reviews)
+	if err != nil {
+		return nil, err
+	}
+
+	return reviews, nil
 }
 
 // sendGet sends an HTTP GET request
