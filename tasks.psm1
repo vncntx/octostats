@@ -82,6 +82,29 @@ Function Install-Hooks {
 
 <#
 .SYNOPSIS
+Build code
+
+.DESCRIPTION
+Build a binary executable from this project
+
+.EXAMPLE
+Build-Project
+#>
+Function Build-Project {
+    $module = (Get-GoModule)
+    $binary = (Get-Binary)
+	Write-Info "building $module"
+    Write-Info "binary will be created in $binary"
+	go build -o $binary .
+    if (Assert-ExitCode(0)) {
+        Write-Success "created binary '$binary'"
+    } else {
+        Write-Error "error while creating binary"
+    }
+}
+
+<#
+.SYNOPSIS
 Build and run the application
 
 .EXAMPLE
@@ -197,6 +220,7 @@ Function Publish-Version($version) {
 
 ##################################################
 
+Export-ModuleMember -Function Build-Project
 Export-ModuleMember -Function Invoke-Run
 Export-ModuleMember -Function Format-Project
 Export-ModuleMember -Function Install-Project
@@ -253,4 +277,20 @@ Function Get-GoModule {
 
 Function Get-TargetGoVersion {
     Return ((Get-Content go.mod)[2] -Split " ")[-1]
+}
+
+Function Get-Binary {
+    $dir = "bin"
+    $binary = ((Get-GoModule) -Split '/')[-1]
+    if ($IsWindows) {
+		$binary += ".exe"
+	}
+
+    if (-Not (Test-Path $dir)) {
+        Write-Info "'$dir' directory does not exist and will be created"
+        New-Item -ItemType Directory -Path $dir
+    }
+
+    $path=(Join-Path (Get-Location) $dir $binary)
+    return $path
 }
