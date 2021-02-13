@@ -32,12 +32,19 @@ type Pull struct {
 	Number      int       `json:"number"`
 	Title       string    `json:"title"`
 	User        User      `json:"user"`
+	Labels      []Label   `json:"labels"`
 	IsMerged    bool      `json:"merged"`
 	CreatedAt   time.Time `json:"created_at"`
 	MergedAt    time.Time `json:"merged_at"`
 	ClosedAt    time.Time `json:"closed_at"`
 	MergeCommit string    `json:"merge_commit_sha"`
 	Reviewers   []User    `json:"requested_reviewers"`
+}
+
+// Label is pull request or issue label
+type Label struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // SearchResponse are the results of an issue or pull request search
