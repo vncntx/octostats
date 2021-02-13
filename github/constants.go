@@ -2,9 +2,27 @@ package github
 
 // GitHub endpoints
 const (
-	BaseEndpoint = "https://api.github.com"
+	baseEndpoint = "https://api.github.com"
 
-	UserEndpoint  = "/user"
-	ReposEndpoint = "/repos/%s"
-	PullsEndpoint = ReposEndpoint + "/pulls"
+	userEndpoint   = "/user"
+	reposEndpoint  = "/repos"
+	pullsEndpoint  = reposEndpoint + "/%s/pulls"
+	searchEndpoint = "/search/issues"
+)
+
+// GitHub search qualifiers
+const (
+	pr     = "pr"
+	draft  = "draft"
+	merged = "merged"
+)
+
+// GitHub sort methods
+const (
+	updated = "updated"
+)
+
+// GitHub sort ordering
+const (
+	descending = "desc"
 )

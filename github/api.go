@@ -21,7 +21,7 @@ type OctoClient struct {
 // NewOctoClient returns a new OctoClient
 func NewOctoClient(cred Credentials) Client {
 	return &OctoClient{
-		BaseEndpoint: BaseEndpoint,
+		BaseEndpoint: baseEndpoint,
 
 		auth:       cred.EncodeToBasic(),
 		httpClient: &http.Client{},
@@ -30,7 +30,7 @@ func NewOctoClient(cred Credentials) Client {
 
 // GetAuthenticatedUser returns the current user
 func (o *OctoClient) GetAuthenticatedUser() (User, error) {
-	res, err := o.sendGet(UserEndpoint, nil, nil)
+	res, err := o.sendGet(userEndpoint, nil, nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -50,7 +50,7 @@ func (o *OctoClient) ListPulls(repo string, page int, state string) ([]Pull, err
 	params.Set("page", strconv.Itoa(page))
 	params.Set("state", state)
 
-	endpoint := fmt.Sprintf(PullsEndpoint, repo)
+	endpoint := fmt.Sprintf(pullsEndpoint, repo)
 
 	res, err := o.sendGet(endpoint, params, nil)
 	if err != nil {
@@ -66,6 +66,29 @@ func (o *OctoClient) ListPulls(repo string, page int, state string) ([]Pull, err
 	return pulls, nil
 }
 
+// SearchPulls searches for pull requests
+func (o *OctoClient) SearchPulls(repo string, page int, q *QueryBuilder) (SearchResponse, error) {
+	params := url.Values{}
+	params.Set("page", strconv.Itoa(page))
+	params.Set("sort", updated)
+	params.Set("order", descending)
+	params.Set("q", q.withType(pr).Build())
+
+	res, err := o.sendGet(searchEndpoint, params, nil)
+	if err != nil {
+		return SearchResponse{}, err
+	}
+
+	results := SearchResponse{}
+	err = o.parseBody(res, &results)
+	if err != nil {
+		return SearchResponse{}, err
+	}
+
+	return results, nil
+}
+
+// sendGet sends an HTTP GET request
 func (o *OctoClient) sendGet(endpoint string, params url.Values, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest("GET", o.buildURL(endpoint, params), body)
 	if err != nil {

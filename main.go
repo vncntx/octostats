@@ -2,10 +2,8 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/vincentfiestada/octostats/github"
-	"github.com/vincentfiestada/octostats/github/filters"
 	"github.com/vincentfiestada/octostats/util"
 )
 
@@ -47,32 +45,41 @@ func main() {
 	}
 
 	page := 1
-	count := 0                     // number of merged pull requests
-	totalInNanoseconds := int64(0) // total time to merge in nanoseconds
+	count := 0 // number of merged pull requests
+	// totalInNanoseconds := int64(0) // total time to merge in nanoseconds
+
+	query := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
+
 	for {
 		log.Debug("getting page %d of pull requests", page)
-		pulls, err := client.ListPulls(repo, page, filters.All)
+		results, err := client.SearchPulls(repo, page, query)
 		if err != nil {
 			log.Fatal("failed to get pull requests: %s", err)
 			return
 		}
-		if len(pulls) < 1 {
+		if results.IsIncomplete {
+			log.Warn("search results are incomplete due to timeout")
+		}
+		if len(results.Items) < 1 {
 			break
 		}
 		page++
 
-		for _, pull := range pulls {
-			if !pull.MergedAt.IsZero() && pull.User.Login == auth.User {
-				timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
-				log.Info("pull request #%d took %.6f hours to merge (created by %s)", pull.Number, timeToMerge.Hours(), pull.User)
+		for _, pull := range results.Items {
+			log.Debug("%#v", pull)
 
-				totalInNanoseconds += timeToMerge.Nanoseconds()
-				count++
-			}
+			// timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
+			// log.Info("pull request #%d took %.6f hours to merge (created by %s)", pull.Number, timeToMerge.Hours(), pull.User)
+
+			// totalInNanoseconds += timeToMerge.Nanoseconds()
+			count++
 		}
 	}
 
-	avg := time.Duration(totalInNanoseconds / int64(count))
 	log.Info("found %d merged pull requests for %s", count, repo)
-	log.Info("average time to merge: %.6f hours", avg.Hours())
+
+	// if count > 0 {
+	// 	avg := time.Duration(totalInNanoseconds / int64(count))
+	// 	log.Info("average time to merge: %.6f hours", avg.Hours())
+	// }
 }

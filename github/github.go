@@ -1,11 +1,17 @@
 package github
 
-import "time"
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+)
 
 // Client wraps the GitHub API
 type Client interface {
 	GetAuthenticatedUser() (User, error)
 	ListPulls(repo string, page int, state string) ([]Pull, error)
+	SearchPulls(repo string, page int, q *QueryBuilder) (SearchResponse, error)
 }
 
 // User is a GitHub user
@@ -27,5 +33,43 @@ type Pull struct {
 	User        User      `json:"user"`
 	CreatedAt   time.Time `json:"created_at"`
 	MergedAt    time.Time `json:"merged_at"`
+	ClosedAt    time.Time `json:"closed_at"`
 	MergeCommit string    `json:"merge_commit_sha"`
+}
+
+// SearchResponse are the results of an issue or pull request search
+type SearchResponse struct {
+	Total        int            `json:"total_count"`
+	IsIncomplete bool           `json:"incomplete_results"`
+	Items        []SearchResult `json:"items"`
+}
+
+// SearchResult is a single issue or pull request search result
+type SearchResult struct {
+	Number    int       `json:"number"`
+	Title     string    `json:"title"`
+	User      User      `json:"user"`
+	State     string    `json:"state"`
+	Repo      Repo      `json:"repository_url"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// Repo is the unique name of a GitHub repository
+type Repo string
+
+// UnmarshalJSON parses a repo name from a url
+func (r *Repo) UnmarshalJSON(b []byte) error {
+	var url string
+	if err := json.Unmarshal(b, &url); err != nil {
+		return err
+	}
+
+	prefix := baseEndpoint + reposEndpoint + "/"
+	if !strings.HasPrefix(url, prefix) {
+		return fmt.Errorf("unable to parse invalid repo URL '%s'", url)
+	}
+
+	name := strings.TrimPrefix(url, prefix)
+	*r = Repo(name)
+	return nil
 }
