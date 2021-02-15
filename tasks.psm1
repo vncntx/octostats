@@ -92,10 +92,21 @@ Build-Project
 #>
 Function Build-Project {
     $module = (Get-GoModule)
-    $binary = (Get-Binary)
-	Write-Info "building $module"
-    Write-Info "binary will be created in $binary"
-	go build -o $binary .
+    
+    $dir="bin"
+    if (-Not (Test-Path $dir)) {
+        Write-Info "'$dir' directory does not exist and will be created"
+        New-Item -ItemType Directory -Name $dir | Out-Null
+    }
+
+    $file=((Get-GoModule) -Split '/')[-1]
+    if ($IsWindows) {
+	    $file += ".exe"
+    }
+
+    $binary = (Join-Path $dir $file)
+    Write-Info "building $module"
+    go build -o $binary $module
     if (Assert-ExitCode(0)) {
         Write-Success "created binary '$binary'"
     } else {
@@ -277,20 +288,4 @@ Function Get-GoModule {
 
 Function Get-TargetGoVersion {
     Return ((Get-Content go.mod)[2] -Split " ")[-1]
-}
-
-Function Get-Binary {
-    $dir = "bin"
-    $binary = ((Get-GoModule) -Split '/')[-1]
-    if ($IsWindows) {
-		$binary += ".exe"
-	}
-
-    if (-Not (Test-Path $dir)) {
-        Write-Info "'$dir' directory does not exist and will be created"
-        New-Item -ItemType Directory -Path $dir
-    }
-
-    $path=(Join-Path (Get-Location) $dir $binary)
-    return $path
 }
