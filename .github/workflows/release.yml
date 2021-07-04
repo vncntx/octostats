@@ -29,8 +29,11 @@ jobs:
     
       - name: Build binaries
         shell: pwsh
+        env:
+          GO111MODULE: on
         run: |
             $version=($env:GITHUB_REF -Split '/')[-1]
+            ./tools.ps1 install
             ./tools.ps1 release $version
 
       - name: Add to release
