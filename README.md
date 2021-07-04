@@ -1,6 +1,9 @@
-![](/icon.svg)
+![](./icon.svg)
 
 # octostats
+
+[![Conventional Commits](https://img.shields.io/badge/commits-conventional-0047ab.svg?labelColor=16161b)](https://conventionalcommits.org)
+[![License: BSD-3](https://img.shields.io/github/license/vincentfiestada/captainslog.svg?labelColor=16161b&color=0047ab)](./license)
 
 Get stats for your pull requests on GitHub, including
 
@@ -10,15 +13,12 @@ Get stats for your pull requests on GitHub, including
 
 ## Getting Started
 
-To install and build the project using Powershell, run the following
+To install and build the project using Powershell Core, run the following
 
 ```ps1
-Import-Module -Force ./tasks.psm1
-Install-Project
-Build-Project
+./tools install
+./tools build
 ```
-
-You can also use the [go](https://golang.org/doc/cmd) command.
 
 ## Authentication
 
