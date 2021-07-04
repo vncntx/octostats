@@ -26,13 +26,20 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '^1.16'
+
+      - name: Get version
+        id: get_version
+        shell: pwsh
+        run: |
+          $version=($env:GITHUB_REF -Split '/')[-1]
+          Write-Output "::set-output name=version::$version"
     
       - name: Build binaries
         shell: pwsh
         env:
           GO111MODULE: on
         run: |
-            $version=($env:GITHUB_REF -Split '/')[-1]
+            $version=${{ steps.get_version.outputs.version }}
             ./tools.ps1 install
             ./tools.ps1 release $version
 
@@ -41,4 +48,4 @@ jobs:
         with:
           files: "./bin/*"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: ${{ github.event.release.tag_name }}
+          release-tag: ${{ steps.get_version.outputs.version }}
