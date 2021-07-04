@@ -1,0 +1,13 @@
+name: Static Checks
+on: [push]
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Detect issues using linters 
+        uses: golangci/golangci-lint-action@v2

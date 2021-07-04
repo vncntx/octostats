@@ -10,11 +10,10 @@ This project adheres to the [Conventional Commit](https://www.conventionalcommit
 
 ## Getting Started
 
-This project uses [Powershell Core](https://microsoft.com/PowerShell) to run tasks. To get started,
+This project uses [tools](https://vincent.click/toolkit) that run on [Powershell Core](https://microsoft.com/PowerShell). To get started,
 
 ```ps1
-Import-Module -Force ./tasks.psm1
-Get-Command -Module tasks
+./tools help
 ```
 
-The _hooks_ directory contains scripts that enforce the style guide and run tests before every commit. You can set them up by running `Install-Project`.
+The _hooks_ directory contains scripts that enforce the style guide and run tests before every commit. You can set them up by running `./tools install`.
