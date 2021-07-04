@@ -1,5 +1,8 @@
 name: Release Binaries
-on: release
+on:
+  push:
+      tags:
+        - v*.*.* # run on version tags, e.g. v2.0.0
 jobs:
   build:
     name: Publish
@@ -37,5 +40,6 @@ jobs:
         with:
           file: "./bin/*"
           tags: true
+          draft: false
           overwrite: true
           update_latest_release: true
