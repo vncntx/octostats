@@ -39,9 +39,8 @@ jobs:
         env:
           GO111MODULE: on
         run: |
-            $version = "${{ steps.get_version.outputs.version }}"
             ./tools.ps1 install
-            ./tools.ps1 release $version
+            ./tools.ps1 release ${{ steps.get_version.outputs.version }}
 
       - name: Add to release
         uses: AButler/upload-release-assets@v2.0
