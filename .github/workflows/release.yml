@@ -37,12 +37,8 @@ jobs:
             ./tools.ps1 release $version
 
       - name: Add to release
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: AButler/upload-release-assets@v2.0
         with:
-          file: "./bin/*"
-          tags: true
-          draft: false
-          overwrite: true
-          update_latest_release: true
+          files: "./bin/*"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.event.release.tag_name }}
