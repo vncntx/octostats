@@ -1,11 +1,11 @@
-name: Publish Package
+name: Release Binaries
 on:
-  release:
-    tags:
-      - v*.*.* # run on version tags, e.g. v2.0.0
+  push:
+      tags:
+        - v*.*.* # run on version tags, e.g. v2.0.0
 jobs:
-  build:
-    name: Publish
+  release:
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
@@ -21,17 +21,31 @@ jobs:
             sudo apt-get update
             sudo add-apt-repository -y universe
             sudo apt-get install -y powershell
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16'
+
+      - name: Get version
+        id: get_version
+        shell: pwsh
+        run: |
+          $version=($env:GITHUB_REF -Split '/')[-1]
+          Write-Output "::set-output name=version::$version"
     
       - name: Build binaries
         shell: pwsh
+        env:
+          GO111MODULE: on
         run: |
-            $version=($env:GITHUB_REF -Split '/')[-1]
+            $version = "${{ steps.get_version.outputs.version }}"
+            ./tools.ps1 install
             ./tools.ps1 release $version
 
       - name: Add to release
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: AButler/upload-release-assets@v2.0
         with:
-          file: "./bin/*"
-          overwrite: true
+          files: "./bin/*"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ steps.get_version.outputs.version }}

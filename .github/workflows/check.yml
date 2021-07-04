@@ -1,7 +1,7 @@
 name: Static Checks
 on: [push]
 jobs:
-  build:
+  check:
     name: Lint
     runs-on: ubuntu-latest
 
