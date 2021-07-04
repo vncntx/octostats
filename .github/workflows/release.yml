@@ -1,0 +1,37 @@
+name: Publish Package
+on:
+  release:
+    tags:
+      - v*.*.* # run on version tags, e.g. v2.0.0
+jobs:
+  build:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Install Powershell
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y wget apt-transport-https software-properties-common
+            wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+            sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt-get update
+            sudo add-apt-repository -y universe
+            sudo apt-get install -y powershell
+    
+      - name: Build binaries
+        shell: pwsh
+        run: |
+            $version=($env:GITHUB_REF -Split '/')[-1]
+            ./tools.ps1 release $version
+
+      - name: Add to release
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "./bin/*"
+          overwrite: true
