@@ -76,6 +76,7 @@ func main() {
 		results, err := client.SearchPulls(repo, page, query)
 		if err != nil {
 			log.Fatal("failed to get pull requests: %s", err)
+
 			return
 		}
 		if results.IsIncomplete {
@@ -91,12 +92,14 @@ func main() {
 			pull, err := client.GetPull(repo, item.Number)
 			if err != nil {
 				log.Warn("couldn't get details of pull request #%d: %s", item.Number, err)
+
 				continue
 			}
 
 			// Record time to merge
 			if pull.CreatedAt.IsZero() || pull.MergedAt.IsZero() {
 				log.Warn("pull request #%d has invalid timestamps", pull.Number)
+
 				continue
 			}
 
@@ -107,6 +110,7 @@ func main() {
 			reviews, err := countReviews(client, repo, item.Number)
 			if err != nil {
 				log.Warn("couldn't count reviews for pull request #%d: %s", item.Number, err)
+
 				continue
 			}
 			reviewsCount += reviews
@@ -150,6 +154,7 @@ func countReviews(client github.Client, repo string, pr int) (int, error) {
 		reviews, err := client.ListReviews(repo, pr, page)
 		if err != nil {
 			log.Fatal("failed to get pull requests: %s", err)
+
 			return count, err
 		}
 		if len(reviews) < 1 {

@@ -33,6 +33,7 @@ func (unit *UnitTest) ExpectFile(file *os.File) Expectation {
 	if err != nil {
 		unit.Errorf("could not read from file '%s'", file.Name())
 	}
+
 	return unit.Expect(string(contents))
 }
 
@@ -64,12 +65,12 @@ func (unit *UnitTest) createStream() (readable *os.File, writable *os.File) {
 	if err != nil {
 		unit.Errorf("failed to create stream: %s", err)
 	}
+
 	return
 }
 
 func (unit *UnitTest) closeStream(stream *os.File) {
-	err := stream.Close()
-	if err != nil {
+	if err := stream.Close(); err != nil {
 		unit.Errorf("failed to close stream %s: %s", stream.Name(), err)
 	}
 }

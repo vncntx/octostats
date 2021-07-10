@@ -31,42 +31,49 @@ func Query(keywords string) *QueryBuilder {
 // IsDraft adds a draft pull request qualifier
 func (q *QueryBuilder) IsDraft() *QueryBuilder {
 	q.isDraft = true
+
 	return q
 }
 
 // IsMerged adds a merged pull request qualifier
 func (q *QueryBuilder) IsMerged() *QueryBuilder {
 	q.isMerged = true
+
 	return q
 }
 
 // WithState filters issues and pull requests by state
 func (q *QueryBuilder) WithState(state string) *QueryBuilder {
 	q.state = state
+
 	return q
 }
 
 // WithAuthor filters issues and pull requests by the author's login username
 func (q *QueryBuilder) WithAuthor(authorLogin string) *QueryBuilder {
 	q.author = authorLogin
+
 	return q
 }
 
 // WithRepo filters issues and pull requests by repository
 func (q *QueryBuilder) WithRepo(repo string) *QueryBuilder {
 	q.repo = repo
+
 	return q
 }
 
 // IsMergedAfter filters pull requests that were merged after a given date
 func (q *QueryBuilder) IsMergedAfter(t time.Time) *QueryBuilder {
 	q.mergedAfter = t
+
 	return q
 }
 
 // withType adds a type qualifier
 func (q *QueryBuilder) withType(typ string) *QueryBuilder {
 	q.typ = typ
+
 	return q
 }
 
