@@ -15,5 +15,6 @@ type Credentials struct {
 // EncodeToBasic encodes the credentials as an RFC-2617 Basic Authorization header
 func (c Credentials) EncodeToBasic() string {
 	credentials := fmt.Sprintf("%s:%s", c.User, c.Token)
+
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
 }

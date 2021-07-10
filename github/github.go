@@ -87,6 +87,7 @@ func (r *Repo) UnmarshalJSON(b []byte) error {
 
 	name := strings.TrimPrefix(url, prefix)
 	*r = Repo(name)
+
 	return nil
 }
 

@@ -134,6 +134,7 @@ func (o *OctoClient) sendGet(endpoint string, params url.Values, body io.Reader)
 		return nil, err
 	}
 	o.setHeaders(req)
+
 	return o.sendRequest(req)
 }
 

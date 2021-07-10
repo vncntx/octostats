@@ -1,14 +1,11 @@
 package main
 
 import (
-	"os"
-	"strings"
 	"time"
 
 	"github.com/hako/durafmt"
 	"github.com/vincentfiestada/octostats/commons"
 	"github.com/vincentfiestada/octostats/github"
-	"github.com/vincentfiestada/octostats/util"
 )
 
 const (
@@ -16,36 +13,9 @@ const (
 )
 
 func main() {
-	auth := github.Credentials{
-		User:  os.Getenv(GitHubUser),
-		Token: os.Getenv(GitHubToken),
-	}
-	if len(auth.User) < 1 {
-		log.Fatal("GitHub login user is empty. Set %s env variable", GitHubUser)
-	}
-	if len(auth.Token) < 1 {
-		log.Fatal("GitHub login token is empty. Set %s env variable", GitHubToken)
-	}
-
-	if len(os.Args) < 2 {
-		log.Fatal("repository name is required.")
-	}
-	repo := os.Args[1]
-	if !util.Matches(repositoryPattern, repo) {
-		log.Fatal("repository name '%s' is invalid; must be of the form `owner/name`", repo)
-	}
-
-	mergedAfter := time.Time{}
-	if len(os.Args) >= 3 {
-		timeArg := os.Args[2]
-		if strings.HasPrefix(timeArg, "-") {
-			// use argument as time offset
-			mergedAfter = getTimeFromDuration(timeArg)
-		} else {
-			// use argument as date
-			mergedAfter = getTimeFromDate(timeArg)
-		}
-	}
+	auth := getAuth()
+	repo := getRepo()
+	mergedAfter := getStartTime()
 
 	log.Info("inspecting %s", repo)
 	client := github.NewOctoClient(auth)
@@ -62,121 +32,80 @@ func main() {
 	reviewsCount := 0                          // total number of pr reviews
 	timeToMergeInNanoSeconds := int64(0)       // total time to merge in nanoseconds
 
-	query := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
-
-	if !mergedAfter.IsZero() {
-		log.Info("looking at pull requests merged after %s", mergedAfter.Format(commons.DateLayout))
-		query.IsMergedAfter(mergedAfter)
-	} else {
-		log.Info("looking at pull requests by %s in %s", auth.User, repo)
-	}
+	query := buildQuery(repo, auth, mergedAfter)
 
 	for {
-		log.Debug("getting page %d of pull requests", page)
-		results, err := client.SearchPulls(repo, page, query)
-		if err != nil {
-			log.Fatal("failed to get pull requests: %s", err)
-			return
-		}
-		if results.IsIncomplete {
-			log.Warn("search results are incomplete due to timeout")
-		}
+		results := runQuery(client, repo, query, page)
 		if len(results.Items) < 1 {
 			break
 		}
 		page++
 
 		for _, item := range results.Items {
-
-			pull, err := client.GetPull(repo, item.Number)
+			stats, err := getStats(client, repo, item)
 			if err != nil {
-				log.Warn("couldn't get details of pull request #%d: %s", item.Number, err)
+				log.Warn(err.Error())
+
 				continue
 			}
+			stats.log()
 
-			// Record time to merge
-			if pull.CreatedAt.IsZero() || pull.MergedAt.IsZero() {
-				log.Warn("pull request #%d has invalid timestamps", pull.Number)
-				continue
-			}
-
-			timeToMerge := pull.MergedAt.Sub(pull.CreatedAt)
-			timeToMergeInNanoSeconds += timeToMerge.Nanoseconds()
-
-			// Record number of reviews
-			reviews, err := countReviews(client, repo, item.Number)
-			if err != nil {
-				log.Warn("couldn't count reviews for pull request #%d: %s", item.Number, err)
-				continue
-			}
-			reviewsCount += reviews
-
-			timeToMergeFriendly := durafmt.Parse(timeToMerge).LimitFirstN(2)
-			log.Info("pull request #%d took %s to merge on %s (%d reviews)", pull.Number, timeToMergeFriendly, pull.MergedAt.Format(commons.DateLayout), reviews)
-
-			// Count per label
-			for _, label := range pull.Labels {
+			// aggregate stats
+			timeToMergeInNanoSeconds += stats.timeToMerge.Nanoseconds()
+			reviewsCount += stats.reviews
+			for _, label := range stats.labels {
 				countByLabel[label]++
 			}
-
-			// Count merged pull requests
 			count++
 		}
 	}
 
+	avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
+	avgReviews := reviewsCount / count
+
+	summarize(repo, count, avgTimeToMerge, avgReviews, countByLabel)
+}
+
+// buildQuery builds a query for pull requests by repo, author, and merge time
+func buildQuery(repo string, auth github.Credentials, mergedAfter time.Time) *github.QueryBuilder {
+	q := github.Query("").WithRepo(repo).WithAuthor(auth.User).IsMerged()
+
+	if !mergedAfter.IsZero() {
+		log.Info("looking at pull requests merged after %s", mergedAfter.Format(commons.DateLayout))
+		q.IsMergedAfter(mergedAfter)
+	} else {
+		log.Info("looking at pull requests by %s in %s", auth.User, repo)
+	}
+
+	return q
+}
+
+// runQuery searches for pull requests using a prepared query
+func runQuery(client github.Client, repo string, query *github.QueryBuilder, page int) github.SearchResponse {
+	log.Debug("getting page %d of pull requests", page)
+	results, err := client.SearchPulls(repo, page, query)
+	if err != nil {
+		log.Fatal("failed to get pull requests: %s", err)
+	}
+	if results.IsIncomplete {
+		log.Warn("search results are incomplete due to timeout")
+	}
+
+	return results
+}
+
+// summarize prints a summary of the collected stats
+func summarize(repo string, count int, avgTimeToMerge time.Duration, avgReviews int, countByLabel map[github.Label]int) {
 	log.Info("found %d merged pull requests for %s", count, repo)
 
 	if count < 1 {
 		return
 	}
 
-	avgTimeToMerge := time.Duration(timeToMergeInNanoSeconds / int64(count))
 	avgTimeToMergeFriendly := durafmt.Parse(avgTimeToMerge)
 	log.Info("average time to merge: %0.4f hours (%s)", avgTimeToMerge.Hours(), avgTimeToMergeFriendly)
-
-	avgReviewsCount := reviewsCount / count
-	log.Info("average reviewers count: %d", avgReviewsCount)
-
+	log.Info("average reviewers count: %d", avgReviews)
 	for label, count := range countByLabel {
 		log.Info("with label '%s': %d", label, count)
 	}
-}
-
-func countReviews(client github.Client, repo string, pr int) (int, error) {
-	page := 1
-	count := 0
-
-	for {
-		reviews, err := client.ListReviews(repo, pr, page)
-		if err != nil {
-			log.Fatal("failed to get pull requests: %s", err)
-			return count, err
-		}
-		if len(reviews) < 1 {
-			break
-		}
-		page++
-
-		count += len(reviews)
-	}
-
-	return count, nil
-}
-
-func getTimeFromDuration(rawDuration string) time.Time {
-	duration, err := time.ParseDuration(rawDuration)
-	if err != nil {
-		log.Fatal("invalid duration '%s'", rawDuration)
-	}
-
-	return time.Now().Add(duration)
-}
-
-func getTimeFromDate(rawDate string) time.Time {
-	t, err := time.Parse(commons.DateLayout, rawDate)
-	if err != nil {
-		log.Fatal("invalid date '%s'", rawDate)
-	}
-
-	return t
 }
