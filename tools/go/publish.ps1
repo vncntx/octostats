@@ -35,7 +35,7 @@ function Publish-GoModule {
 Confirm the declared version in the doc file
 
 .EXAMPLE
-Confirm-DeclaredVersion doc.go v2.0.0
+Confirm-DeclaredVersion v2.0.0
 #>
 function Confirm-DeclaredVersion {
     param(

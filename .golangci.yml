@@ -6,7 +6,6 @@ linters:
     - dupl
     - errcheck
     - errorlint
-    - exhaustive
     - funlen
     - gci
     - gocognit

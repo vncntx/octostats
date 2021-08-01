@@ -12,10 +12,27 @@ enum Result {
 class GoTest {
     [String]$Name
     [Result]$Result
+    [String[]]$Errors
 
-    GoTest([String]$Name, [Result]$Result) {
+    GoTest([String]$Name) {
         $this.Name = $Name
-        $this.Result = $Result
+        $this.Result = [Result]::None
+        $this.Errors = @()
+    }
+
+    AddError([String]$Log) {
+        $LOG_PATTERN = '^.+:\d+: .+: (?<message>.+)$'
+
+        switch -Regex ($Log) {
+            $LOG_PATTERN {
+                $parsed = Select-String -Pattern $LOG_PATTERN -InputObject $Log
+                $message = $parsed.Matches.Groups[1].Value
+                $this.Errors += $message
+            }
+            default {
+                # ignore
+            }
+        }
     }
 
     Write() {
@@ -33,7 +50,14 @@ class GoTest {
                 Write-Pass $n
             }
             Fail {
-                Write-Fail $n
+                Write-Fail "`e[3m$n`e[0m"
+                foreach ($err in $this.Errors) {
+                    Write-Host ''
+                    Write-Text ''
+                    Write-Text "   $err"
+                    Write-Host ''
+                }
+                Write-Host ''
             }
         }
     }
@@ -42,16 +66,30 @@ class GoTest {
 class GoPackage {
     [String]$Name
     [Double]$Coverage
-    [GoTest[]]$Tests
+    [HashTable]$Tests
 
     GoPackage([String]$Name) {
         $this.Name = $Name
         $this.Coverage = 0
-        $this.Tests = @()
+        $this.Tests = @{}
+    }
+
+    AddTestResult([String]$Name, [Result]$Result) {
+        if (-not $this.Tests.ContainsKey($Name)) {
+            $this.Tests[$Name] = [GoTest]::new($Name)
+        }
+        $this.Tests[$Name].Result = $Result
+    }
+
+    AddTestLog([String]$Name, [String]$Log) {
+        if (-not $this.Tests.ContainsKey($Name)) {
+            $this.Tests[$Name] = [GoTest]::new($Name)
+        }
+        $this.Tests[$Name].AddError($Log)
     }
 
     [GoTest[]]FindByResult([Result]$Result) {
-        return $this.Tests | Where-Object { $_.Result -eq $Result }
+        return $this.Tests.Values | Where-Object { $_.Result -eq $Result }
     }
 
     Write() {
@@ -67,11 +105,18 @@ class GoTestCollection {
         $this.Packages = @{}
     }
 
-    AddTest([String]$Name, [String]$Package, [Result]$Result) {
+    AddTestResult([String]$Name, [String]$Package, [Result]$Result) {
         if (-not $this.Packages.ContainsKey($Package)) {
             $this.Packages[$Package] = [GoPackage]::new($Package)
         }
-        $this.Packages[$Package].Tests += [GoTest]::new($Name, $Result)
+        $this.Packages[$Package].AddTestResult($Name, $Result)
+    }
+
+    AddTestLog([String]$Name, [String]$Package, [String]$Log) {
+        if (-not $this.Packages.ContainsKey($Package)) {
+            $this.Packages[$Package] = [GoPackage]::new($Package)
+        }
+        $this.Packages[$Package].AddTestLog($Name, $Log)
     }
 
     AddCoverage([String]$Package, [Double]$Coverage) {
@@ -84,16 +129,25 @@ class GoTestCollection {
     [HashTable]Count() {
         $pkgs = $this.Packages.Values
         return @{
-            [Result]::Skip = $pkgs | foreach { $count = 0 } { $count += ($_.FindByResult([Result]::Skip)).Count } { $count };
-            [Result]::Pass = $pkgs | foreach { $count = 0 } { $count += ($_.FindByResult([Result]::Pass)).Count } { $count };
-            [Result]::Fail = $pkgs | foreach { $count = 0 } { $count += ($_.FindByResult([Result]::Fail)).Count } { $count }
+            [Result]::Skip = $this.CountTestResultsByResult($pkgs, [Result]::Skip);
+            [Result]::Pass = $this.CountTestResultsByResult($pkgs, [Result]::Pass);
+            [Result]::Fail = $this.CountTestResultsByResult($pkgs, [Result]::Fail)
         }
+    }
+
+    [Int]CountTestResultsByResult([GoPackage[]]$Packages, [Result]$Result) {
+        $count = 0
+        foreach ($pkg in $Packages) {
+            $count += $pkg.FindByResult($Result).Count
+        }
+        
+        return $count
     }
 
     Write() {
         foreach ($package in $this.Packages.Values) {
             $package.Write()
-            foreach ($test in $package.Tests | Sort-Object -Property Result,Name) {
+            foreach ($test in $package.Tests.Values | Sort-Object -Property Result,Name) {
                 $test.Write()
             }
         }
@@ -127,18 +181,21 @@ function Invoke-GoTests {
         $name = $x.Test
         $package = $x.Package
         $action = $x.Action
-        $output = $x.Output
+        $log = $x.Output
 
         if ($name) {
             switch ($action) {
                 'skip' {
-                    $t.AddTest($name, $package, [Result]::Skip)
+                    $t.AddTestResult($name, $package, [Result]::Skip)
                 }
                 'pass' {
-                    $t.AddTest($name, $package, [Result]::Pass)
+                    $t.AddTestResult($name, $package, [Result]::Pass)
                 }
                 'fail' {
-                    $t.AddTest($name, $package, [Result]::Fail)
+                    $t.AddTestResult($name, $package, [Result]::Fail)
+                }
+                'output' {
+                    $t.AddTestLog($name, $package, $log)
                 }
                 default {
                     # ignore

@@ -27,9 +27,8 @@ function Build-GoBinary {
     if ($Targets.Length -lt 1) {
         $os = (go env GOOS)
         $arch = (go env GOARCH)
-        $Targets = @(
-            [BuildTarget]::new($os, $arch)
-        )
+        
+        $Targets = @([BuildTarget]::new($os, $arch))
     }
 
     if (-Not (Test-Path $Directory)) {
