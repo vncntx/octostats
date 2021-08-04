@@ -41,7 +41,8 @@ class CodeError {
         $padding = $env:LOG_PADDING ?? 5
         $relPath = (Resolve-Path -Path $this.File -Relative)
 
-        Write-Text -Text 'error' -Color Red
+        Write-Host -NoNewline -ForegroundColor Red 'error'.PadLeft($padding)
+        Write-Host -NoNewline ' : '
         Write-Host -NoNewline -ForegroundColor Black -BackgroundColor White " $relPath "
         Write-Host ''
         Write-Host ''
@@ -111,7 +112,8 @@ class CodeIssue {
     Write() {
         $padding = $env:LOG_PADDING ?? 5
 
-        Write-Text -Text 'error' -Color Red
+        Write-Host -NoNewline -ForegroundColor Red 'error'.PadLeft($padding)
+        Write-Host -NoNewline ' : '
         Write-Host -NoNewline -ForegroundColor Black -BackgroundColor White " $($this.Detector) "
         Write-Host " in `e[3m$($this.Excerpt.File)`e[0m @ `e[4m$($this.Excerpt.Line):$($this.Excerpt.Column)`e[24m".PadLeft($padding)
         Write-Host ''
@@ -142,30 +144,6 @@ function Assert-ExitCode {
 
 <#
 .SYNOPSIS
-Format and print text inline
-
-.EXAMPLE
-Write-Text -Text "info" " -Color Cyan
-#>
-function Write-Text {
-    param(
-        [Parameter(ValueFromPipeline=$true)]
-        [Object]$Text,
-
-        [String]$Color = $null,
-
-        [Int32]$Padding = $env:LOG_PADDING ?? 5
-    )
-
-    if (-not $Color) {
-        Write-Host -NoNewline $Text.PadLeft($Padding)
-    } else {
-        Write-Host -NoNewline $Text.PadLeft($Padding) -ForegroundColor $Color
-    }
-}
-
-<#
-.SYNOPSIS
 Log a message
 
 .EXAMPLE
@@ -179,8 +157,20 @@ function Write-Log {
         [Int32]$Padding = $env:LOG_PADDING ?? 5
     )
 
-    Write-Text -Text $Level -Color $Color -Padding $Padding
+    Write-Host -NoNewline -ForegroundColor $Color $Level.PadLeft($Padding)
     Write-Host " : $Message"
+}
+
+<#
+.SYNOPSIS
+Return a blank string with the default padding length
+
+.EXAMPLE
+Get-Pad
+#>
+function Get-Pad {
+    $pad = $env:LOG_PADDING ?? 5
+    return ''.PadLeft($pad)
 }
 
 <#
