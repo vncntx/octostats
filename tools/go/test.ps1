@@ -53,9 +53,7 @@ class GoTest {
                 Write-Fail "`e[3m$n`e[0m"
                 foreach ($err in $this.Errors) {
                     Write-Host ''
-                    Write-Text ''
-                    Write-Text "   $err"
-                    Write-Host ''
+                    Write-Host (Get-Pad) "  $err"
                 }
                 Write-Host ''
             }
