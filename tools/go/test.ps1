@@ -201,8 +201,8 @@ function Invoke-GoTests {
             }
         } elseif ($package) {
             $coverage_pattern = "coverage: (?<coverage>[0-9\.]+)% of statements"
-            if ($output -match $coverage_pattern) {
-                $parsed = Select-String -Pattern $coverage_pattern -InputObject $output
+            if ($log -match $coverage_pattern) {
+                $parsed = Select-String -Pattern $coverage_pattern -InputObject $log
                 $coverage = $parsed.Matches[0].Groups[1]
 
                 $t.AddCoverage($package, [Double]::Parse($coverage))
