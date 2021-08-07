@@ -115,7 +115,11 @@ Optimize-Imports
 #>
 function Optimize-Imports {
     $errs = [CodeErrorCollection]::new()
-
+    
+    if (-not $env:GOBIN) {
+        Write-Warning '$env:GOBIN is not set'
+        return $errs.Errors
+    }
     if (-not (Get-Command -Name (Join-Path $env:GOBIN 'gci') -ErrorAction SilentlyContinue)) {
         Write-Warning 'unable to optimize imports'
         return $errs.Errors

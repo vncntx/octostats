@@ -46,6 +46,10 @@ function Invoke-GoChecks {
     $e = 0
     $w = 0
 
+    if (-not $env:GOBIN) {
+        Write-Warning '$env:GOBIN is not set'
+        exit [Error]::NoGoBin
+    }
     Invoke-Expression "$(Join-Path $env:GOBIN 'golangci-lint') run --fix=$Fix --out-format=json" 2>&1 | ForEach-Object {
         $log = $_
 
@@ -105,4 +109,5 @@ function Invoke-GoChecks {
 
 enum Error {
     Fail = 1
+    NoGoBin = 2
 }
