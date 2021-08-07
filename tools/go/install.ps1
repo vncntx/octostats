@@ -62,11 +62,22 @@ function Confirm-Ready {
     } else {
         Write-Ok "go v$target is installed"
     }
+    
+    if (-not $env:GOBIN) {
+        Write-Warning '$env:GOBIN is not set'
+        return
+    }
     # golangci-lint should be installed
-    if (-not (Get-Command -Name "golangci-lint" -ErrorAction SilentlyContinue)) {
-        Write-Warning "golangci-lint is not installed"
+    if (-not (Get-Command -Name (Join-Path $env:GOBIN 'golangci-lint') -ErrorAction SilentlyContinue)) {
+        Write-Warning 'golangci-lint is not installed. [https://golangci-lint.run/]'
     } else {
-        Write-Ok "golangci-lint is installed"
+        Write-Ok 'golangci-lint is installed'
+    }
+    # gci should be installed
+    if (-not (Get-Command -Name (Join-Path $env:GOBIN 'gci') -ErrorAction SilentlyContinue)) {
+        Write-Warning 'gci is not installed. [https://github.com/daixiang0/gci]'
+    } else {
+        Write-Ok 'gci is installed'
     }
 }
 
