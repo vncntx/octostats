@@ -60,17 +60,15 @@ class CodeErrorCollection {
         $this.Errors = @{}
     }
 
-    Add([String]$File, [String]$Location, [String]$Text) {
+    Add([String]$File, [String]$Text) {
         if (-not $this.Errors.ContainsKey($File)) {
             $this.Errors[$File] = [CodeError]::new($File)
         }
-        $this.Errors[$File].Text += "`e[4m$Location`e[24m : $Text"
+        $this.Errors[$File].Text += $Text
     }
 
-    Add([String]$Log, [String]$Pattern) {
-        $parsed = Select-String -Pattern $Pattern -InputObject $Log
-        $file, $loc, $txt = $parsed.Matches.Groups[1..3].Value
-        $this.Add($file, $loc, $txt)
+    Add([String]$File, [String]$Location, [String]$Text) {
+        $this.Add($File, "`e[4m$Location`e[24m : $Text")
     }
 
     [Int]Count() {
