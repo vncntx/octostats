@@ -89,7 +89,7 @@ function Invoke-Tools {
             'build for all supported platforms',
             {
                 $version = $Arguments[0]
-                Build-GoBinary 'bin' "octostats_$version" @(
+                Build-GoBinary 'bin' "vincent.click/pkg/octostats_$version" @(
                     [BuildTarget]::new('darwin', 'amd64'),
                     [BuildTarget]::new('darwin', 'arm64'),
                     [BuildTarget]::new('linux', '386'),

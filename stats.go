@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/hako/durafmt"
-	"octostats/commons"
-	"octostats/github"
+	"vincent.click/pkg/octostats/commons"
+	"vincent.click/pkg/octostats/github"
 )
 
 // stats are information about a pull request

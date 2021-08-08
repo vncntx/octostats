@@ -2,10 +2,10 @@
 
 # octostats
 
-[![](https://github.com/vncntx/octostats/workflows/Unit%20Tests/badge.svg)](https://github.com/vincentfiestada/octostats/actions?query=workflow%3A%22Unit+Tests%22)
-[![](https://github.com/vncntx/octostats/workflows/Static%20Checks/badge.svg)](https://github.com/vincentfiestada/octostats/actions?query=workflow%3A%22Static+Checks%22)
+[![](https://github.com/vncntx/octostats/workflows/Unit%20Tests/badge.svg)](https://github.com/vncntx/octostats/actions?query=workflow%3A%22Unit+Tests%22)
+[![](https://github.com/vncntx/octostats/workflows/Static%20Checks/badge.svg)](https://github.com/vncntx/octostats/actions?query=workflow%3A%22Static+Checks%22)
 [![Conventional Commits](https://img.shields.io/badge/commits-conventional-0047ab.svg?labelColor=16161b)](https://conventionalcommits.org)
-[![License: BSD-3](https://img.shields.io/github/license/vincentfiestada/captainslog.svg?labelColor=16161b&color=0047ab)](./license)
+[![License: BSD 3 Clause](https://img.shields.io/github/license/vncntx/octostats.svg?labelColor=16161b&color=0047ab)](./license)
 
 Get stats for your pull requests on GitHub, including
 
