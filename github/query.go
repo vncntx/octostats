@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentfiestada/octostats/commons"
+	"octostats/commons"
 )
 
 // QueryBuilder creates a search query with keywords and qualifiers

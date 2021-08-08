@@ -1,4 +1,4 @@
-module github.com/vincentfiestada/octostats
+module octostats
 
 go 1.16
 

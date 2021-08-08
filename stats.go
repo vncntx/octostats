@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"octostats/commons"
+	"octostats/github"
+
 	"github.com/hako/durafmt"
-	"github.com/vincentfiestada/octostats/commons"
-	"github.com/vincentfiestada/octostats/github"
 )
 
 // stats are information about a pull request
