@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vincentfiestada/octostats/commons"
-	"github.com/vincentfiestada/octostats/github"
-	"github.com/vincentfiestada/octostats/util"
+	"vincent.click/pkg/octostats/commons"
+	"vincent.click/pkg/octostats/github"
+	"vincent.click/pkg/octostats/util"
 )
 
 // getAuth returns credentials from environment variables

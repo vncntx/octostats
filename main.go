@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/hako/durafmt"
-	"github.com/vincentfiestada/octostats/commons"
-	"github.com/vincentfiestada/octostats/github"
+	"vincent.click/pkg/octostats/commons"
+	"vincent.click/pkg/octostats/github"
 )
 
 const (

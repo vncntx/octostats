@@ -1,8 +1,8 @@
 package util
 
 import (
-	"github.com/vincentfiestada/captainslog/v2"
-	"github.com/vincentfiestada/captainslog/v2/format"
+	"vincent.click/pkg/captainslog/v2"
+	"vincent.click/pkg/captainslog/v2/format"
 )
 
 var log *captainslog.Logger
