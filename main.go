@@ -3,10 +3,9 @@ package main
 import (
 	"time"
 
+	"github.com/hako/durafmt"
 	"octostats/commons"
 	"octostats/github"
-
-	"github.com/hako/durafmt"
 )
 
 const (
