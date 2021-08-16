@@ -21,7 +21,7 @@ class GoTest {
     }
 
     AddError([String]$Log) {
-        $LOG_PATTERN = '^.+:\d+: .+: (?<message>.+)$'
+        $LOG_PATTERN = '^.+:\d+: (?<message>.+)$'
 
         switch -Regex ($Log) {
             $LOG_PATTERN {
