@@ -9,11 +9,7 @@ github.com/mattn/go-isatty v0.0.13 h1:qdl+GuBjcsKKDco5BsxPJlId98mSWNKqYA+Co0SC1y
 github.com/mattn/go-isatty v0.0.13/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
 golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 h1:faDu4veV+8pcThn4fewv6TVlNCezafGoC1gM/mxQLbQ=
-golang.org/x/sys v0.0.0-20210611083646-a4fc73990273/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210902050250-f475640dd07b h1:S7hKs0Flbq0bbc9xgYt4stIEG1zNDFqyrPwAX2Wj/sE=
 golang.org/x/sys v0.0.0-20210902050250-f475640dd07b/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-vincent.click/pkg/captainslog/v2 v2.5.1 h1:PTmKh3lMSrYcMDDE8LF+moypBp1QkqQ4vbQVRBHnblc=
-vincent.click/pkg/captainslog/v2 v2.5.1/go.mod h1:MHUAjf+Cp97wJbKtIyKFlm/90b0I5RcnYqSMU7abVCw=
-vincent.click/pkg/captainslog/v2 v2.5.2 h1:og7Z4tx0Uk5nyIraw2cDWMyp/K+s6p88R3xvsvJUu4o=
-vincent.click/pkg/captainslog/v2 v2.5.2/go.mod h1:GuE3pL1QbkSKzGN0uLfGQNyQYnVR938tyIl6Vg8QnwQ=
+vincent.click/pkg/captainslog/v2 v2.5.3 h1:97krdIEKrZPCbc1/RHba1cc3ng/vAPnqewomWUvZ8rE=
+vincent.click/pkg/captainslog/v2 v2.5.3/go.mod h1:dqEulnlT/0S3INTsavV0ROsxGaIWDH5/NZHvR9yPRN8=
