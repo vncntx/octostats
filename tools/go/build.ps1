@@ -36,6 +36,12 @@ function Build-GoBinary {
         New-Item -ItemType Directory -Name $Directory > $null
     }
     $dir = Resolve-Path -Relative $Directory
+    $checksums = Join-Path $dir "checksums.txt"
+    
+    if (Test-Path -Path $checksums -ErrorAction SilentlyContinue) {
+        # remove existing checksums
+        Remove-Item $checksums
+    }
 
     $saved = @{
         'GOOS' = $env:GOOS;
@@ -63,14 +69,16 @@ function Build-GoBinary {
 
             if (Assert-ExitCode 0) {
                 $c++
+                $sum = (Get-FileHash -Algorithm SHA256 -Path $binary)
                 Write-Ok "binary built for $os, $arch"
+                Write-Output "$($sum.Algorithm) $($sum.Hash) $binary" >> $checksums
             } else {
                 $e++
                 Write-Error "error while building for $os, $arch"
             }
         }
     } finally {
-        # Restore environment variables
+        # restore environment variables
         $env:GOOS = $saved['GOOS']
         $env:GOARCH = $saved['GOARCH']
     }

@@ -22,10 +22,16 @@ class GoTest {
 
     AddError([String]$Log) {
         $LOG_PATTERN = '^.+:\d+: (?<message>.+)$'
+        $PANIC_PATTERN = '^(?<message>panic: .+)$'
 
         switch -Regex ($Log) {
             $LOG_PATTERN {
                 $parsed = Select-String -Pattern $LOG_PATTERN -InputObject $Log
+                $message = $parsed.Matches.Groups[1].Value
+                $this.Errors += $message
+            }
+            $PANIC_PATTERN {
+                $parsed = Select-String -Pattern $PANIC_PATTERN -InputObject $Log
                 $message = $parsed.Matches.Groups[1].Value
                 $this.Errors += $message
             }
