@@ -63,6 +63,6 @@ octostats owner/repo 2019-07-23
 Please read the [Contribution Guide](./CONTRIBUTING.md) before you proceed.
 
 ## Copyright
-Copyright 2021 [Vincent Fiestada](https://vincent.click). Released under a [BSD-3-Clause License](./license).
+Copyright 2021 [Vincent Fiestada](https://vincent.click). Released under an [MIT License](./license).
 
 Icon made by [Dave Gandy](https://www.flaticon.com/authors/dave-gandy).
