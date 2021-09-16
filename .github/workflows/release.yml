@@ -45,6 +45,6 @@ jobs:
       - name: Add to release
         uses: AButler/upload-release-assets@v2.0
         with:
-          files: "./bin/vincent.click/pkg/*"
+          files: "./bin/*"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.get_version.outputs.version }}
