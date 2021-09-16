@@ -1,48 +1,36 @@
 name: Commits
 on: [push]
+
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   lint:
     name: Static Checks
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout
         uses: actions/checkout@v1
 
       - name: Detect issues using linters 
         uses: golangci/golangci-lint-action@v2
-
-  setup:
-    name: Setup Environment
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Install Powershell
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y wget apt-transport-https software-properties-common
-            wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
-            sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt-get update
-            sudo add-apt-repository -y universe
-            sudo apt-get install -y powershell
-      
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '^1.17'
         
   test:
-    name: Test
+    name: Unit Tests
     runs-on: ubuntu-latest
-    needs: setup
 
     steps:
       - name: Check out code
         uses: actions/checkout@v1
 
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17'
+
       - name: Run tests
-        shell: pwsh
         env:
           GO111MODULE: on
         run: |
