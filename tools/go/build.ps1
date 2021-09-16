@@ -71,7 +71,7 @@ function Build-GoBinary {
                 $c++
                 $sum = (Get-FileHash -Algorithm SHA256 -Path $binary)
                 Write-Ok "binary built for $os, $arch"
-                Write-Output "$($sum.Algorithm) $($sum.Hash) $binary" >> $checksums
+                Write-Output "$($sum.Algorithm) $($sum.Hash) $file" >> $checksums
             } else {
                 $e++
                 Write-Error "error while building for $os, $arch"
